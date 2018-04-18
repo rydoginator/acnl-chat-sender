@@ -288,5 +288,10 @@ namespace ntrclient
         {
             System.Diagnostics.Process.Start("https://www.youtube.com/channel/UCrhH19ztjidXUP0sAa-wx4w");
         }
+
+        private void githubToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/RyDog199/acnl-chat-sender/");
+        }
     }
 }

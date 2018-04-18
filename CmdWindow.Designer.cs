@@ -31,6 +31,12 @@
             this.components = new System.ComponentModel.Container();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.creditsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cell9ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.chatSenderByRydoginatorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.versionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.verToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.disconnectTimer = new System.Windows.Forms.Timer(this.components);
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -49,12 +55,7 @@
             this.txtCmd = new System.Windows.Forms.TextBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.creditsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.versionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.verToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.cell9ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.chatSenderByRydoginatorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.githubToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -80,6 +81,51 @@
             this.menuStrip1.Size = new System.Drawing.Size(684, 24);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
+            // 
+            // creditsToolStripMenuItem
+            // 
+            this.creditsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.cell9ToolStripMenuItem,
+            this.chatSenderByRydoginatorToolStripMenuItem,
+            this.githubToolStripMenuItem});
+            this.creditsToolStripMenuItem.Name = "creditsToolStripMenuItem";
+            this.creditsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
+            this.creditsToolStripMenuItem.Text = "Credits";
+            // 
+            // cell9ToolStripMenuItem
+            // 
+            this.cell9ToolStripMenuItem.Name = "cell9ToolStripMenuItem";
+            this.cell9ToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
+            this.cell9ToolStripMenuItem.Text = "cell9";
+            // 
+            // chatSenderByRydoginatorToolStripMenuItem
+            // 
+            this.chatSenderByRydoginatorToolStripMenuItem.Name = "chatSenderByRydoginatorToolStripMenuItem";
+            this.chatSenderByRydoginatorToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
+            this.chatSenderByRydoginatorToolStripMenuItem.Text = "Chat sender by rydoginator";
+            this.chatSenderByRydoginatorToolStripMenuItem.Click += new System.EventHandler(this.chatSenderByRydoginatorToolStripMenuItem_Click);
+            // 
+            // versionToolStripMenuItem
+            // 
+            this.versionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.verToolStripMenuItem});
+            this.versionToolStripMenuItem.Name = "versionToolStripMenuItem";
+            this.versionToolStripMenuItem.Size = new System.Drawing.Size(57, 20);
+            this.versionToolStripMenuItem.Text = "Version";
+            // 
+            // verToolStripMenuItem
+            // 
+            this.verToolStripMenuItem.Name = "verToolStripMenuItem";
+            this.verToolStripMenuItem.Size = new System.Drawing.Size(90, 22);
+            this.verToolStripMenuItem.Text = "ver";
+            this.verToolStripMenuItem.Click += new System.EventHandler(this.verToolStripMenuItem_Click);
+            // 
+            // aboutToolStripMenuItem
+            // 
+            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
+            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
+            this.aboutToolStripMenuItem.Text = "About";
+            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
             // 
             // disconnectTimer
             // 
@@ -264,49 +310,12 @@
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(118, 17);
             this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
             // 
-            // creditsToolStripMenuItem
+            // githubToolStripMenuItem
             // 
-            this.creditsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.cell9ToolStripMenuItem,
-            this.chatSenderByRydoginatorToolStripMenuItem});
-            this.creditsToolStripMenuItem.Name = "creditsToolStripMenuItem";
-            this.creditsToolStripMenuItem.Size = new System.Drawing.Size(56, 20);
-            this.creditsToolStripMenuItem.Text = "Credits";
-            // 
-            // versionToolStripMenuItem
-            // 
-            this.versionToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.verToolStripMenuItem});
-            this.versionToolStripMenuItem.Name = "versionToolStripMenuItem";
-            this.versionToolStripMenuItem.Size = new System.Drawing.Size(57, 20);
-            this.versionToolStripMenuItem.Text = "Version";
-            // 
-            // aboutToolStripMenuItem
-            // 
-            this.aboutToolStripMenuItem.Name = "aboutToolStripMenuItem";
-            this.aboutToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
-            this.aboutToolStripMenuItem.Text = "About";
-            this.aboutToolStripMenuItem.Click += new System.EventHandler(this.aboutToolStripMenuItem_Click);
-            // 
-            // verToolStripMenuItem
-            // 
-            this.verToolStripMenuItem.Name = "verToolStripMenuItem";
-            this.verToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.verToolStripMenuItem.Text = "ver";
-            this.verToolStripMenuItem.Click += new System.EventHandler(this.verToolStripMenuItem_Click);
-            // 
-            // cell9ToolStripMenuItem
-            // 
-            this.cell9ToolStripMenuItem.Name = "cell9ToolStripMenuItem";
-            this.cell9ToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
-            this.cell9ToolStripMenuItem.Text = "cell9";
-            // 
-            // chatSenderByRydoginatorToolStripMenuItem
-            // 
-            this.chatSenderByRydoginatorToolStripMenuItem.Name = "chatSenderByRydoginatorToolStripMenuItem";
-            this.chatSenderByRydoginatorToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
-            this.chatSenderByRydoginatorToolStripMenuItem.Text = "Chat sender by rydoginator";
-            this.chatSenderByRydoginatorToolStripMenuItem.Click += new System.EventHandler(this.chatSenderByRydoginatorToolStripMenuItem_Click);
+            this.githubToolStripMenuItem.Name = "githubToolStripMenuItem";
+            this.githubToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
+            this.githubToolStripMenuItem.Text = "Github";
+            this.githubToolStripMenuItem.Click += new System.EventHandler(this.githubToolStripMenuItem_Click);
             // 
             // CmdWindow
             // 
@@ -318,7 +327,7 @@
             this.KeyPreview = true;
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "CmdWindow";
-            this.Text = "NTR Debugger";
+            this.Text = "Animal Crossing New Leaf Chat Sender";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.CmdWindow_FormClosed);
             this.Load += new System.EventHandler(this.CmdWindow_Load);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.CmdWindow_KeyDown);
@@ -365,6 +374,7 @@
         private System.Windows.Forms.ToolStripMenuItem versionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem verToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem githubToolStripMenuItem;
     }
 }
 

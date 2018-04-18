@@ -1,0 +1,11 @@
+C:\Users\Ryan\Documents\Github Projects\acnl-chat-sender\bin\Debug\ntrclient.exe.config
+C:\Users\Ryan\Documents\Github Projects\acnl-chat-sender\bin\Debug\ntrclient.exe
+C:\Users\Ryan\Documents\Github Projects\acnl-chat-sender\bin\Debug\ntrclient.pdb
+C:\Users\Ryan\Documents\Github Projects\acnl-chat-sender\obj\Debug\ntrclient.AsmEditWindow.resources
+C:\Users\Ryan\Documents\Github Projects\acnl-chat-sender\obj\Debug\ntrclient.QuickCmdWindow.resources
+C:\Users\Ryan\Documents\Github Projects\acnl-chat-sender\obj\Debug\ntrclient.CmdWindow.resources
+C:\Users\Ryan\Documents\Github Projects\acnl-chat-sender\obj\Debug\ntrclient.Properties.Resources.resources
+C:\Users\Ryan\Documents\Github Projects\acnl-chat-sender\obj\Debug\acnl-chat-sender.csproj.GenerateResource.Cache
+C:\Users\Ryan\Documents\Github Projects\acnl-chat-sender\obj\Debug\acnl-chat-sender.csproj.CoreCompileInputs.cache
+C:\Users\Ryan\Documents\Github Projects\acnl-chat-sender\obj\Debug\ntrclient.exe
+C:\Users\Ryan\Documents\Github Projects\acnl-chat-sender\obj\Debug\ntrclient.pdb
