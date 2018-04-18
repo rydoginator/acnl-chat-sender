@@ -1,0 +1,12 @@
+C:\Users\Ryan\Downloads\ntrclient\bin\Debug\ntrclient.exe.config
+C:\Users\Ryan\Downloads\ntrclient\bin\Debug\ntrclient.exe
+C:\Users\Ryan\Downloads\ntrclient\bin\Debug\ntrclient.pdb
+C:\Users\Ryan\Downloads\ntrclient\obj\Debug\ntrclient.csprojResolveAssemblyReference.cache
+C:\Users\Ryan\Downloads\ntrclient\obj\Debug\ntrclient.AsmEditWindow.resources
+C:\Users\Ryan\Downloads\ntrclient\obj\Debug\ntrclient.QuickCmdWindow.resources
+C:\Users\Ryan\Downloads\ntrclient\obj\Debug\ntrclient.CmdWindow.resources
+C:\Users\Ryan\Downloads\ntrclient\obj\Debug\ntrclient.Properties.Resources.resources
+C:\Users\Ryan\Downloads\ntrclient\obj\Debug\ntrclient.csproj.GenerateResource.Cache
+C:\Users\Ryan\Downloads\ntrclient\obj\Debug\ntrclient.csproj.CoreCompileInputs.cache
+C:\Users\Ryan\Downloads\ntrclient\obj\Debug\ntrclient.exe
+C:\Users\Ryan\Downloads\ntrclient\obj\Debug\ntrclient.pdb

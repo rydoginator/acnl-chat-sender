@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SettingsManager xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <quickCmds>
+    <string />
+    <string />
+    <string />
+    <string />
+    <string />
+    <string />
+    <string />
+    <string />
+    <string />
+    <string />
+  </quickCmds>
+  <IpAddress>192.168.1.164</IpAddress>
+</SettingsManager>
