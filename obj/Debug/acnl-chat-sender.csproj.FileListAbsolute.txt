@@ -9,3 +9,4 @@ C:\Users\Ryan\Documents\Github Projects\acnl-chat-sender\obj\Debug\acnl-chat-sen
 C:\Users\Ryan\Documents\Github Projects\acnl-chat-sender\obj\Debug\acnl-chat-sender.csproj.CoreCompileInputs.cache
 C:\Users\Ryan\Documents\Github Projects\acnl-chat-sender\obj\Debug\ntrclient.exe
 C:\Users\Ryan\Documents\Github Projects\acnl-chat-sender\obj\Debug\ntrclient.pdb
+C:\Users\Ryan\Documents\Github Projects\acnl-chat-sender\obj\Debug\acnl-chat-sender.csprojResolveAssemblyReference.cache

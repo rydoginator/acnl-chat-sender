@@ -120,7 +120,17 @@ namespace ntrclient {
 			return r;
 		}
 
-		void handleReadMem(UInt32 seq, byte[] dataBuf) {
+        static string LittleEndian(string num)
+        {
+            int number = Convert.ToInt32(num, 16);
+            byte[] bytes = BitConverter.GetBytes(number);
+            string retval = "";
+            foreach (byte b in bytes)
+                retval += b.ToString("X2");
+            return retval;
+        }
+
+        void handleReadMem(UInt32 seq, byte[] dataBuf) {
 			if (seq != lastReadMemSeq) {
 				log("seq != lastReadMemSeq, ignored");
 				return;
@@ -134,9 +144,16 @@ namespace ntrclient {
 				log("dump saved into " + fileName + " successfully");
 				return;
 			}
-			log(byteToHex(dataBuf, 0));
+            string hex = byteToHex(dataBuf, 0);
+            log(byteToHex(dataBuf, 0));
+            int length = dataBuf.Length;
+            if ((length == 1) || (length == 2) || (length == 4))
+            {
+                hex = hex.Replace(" ", string.Empty);
+                Program.gCmdWindow.setReadValue(Convert.ToUInt32(LittleEndian(hex), 16));
+            }
 
-		}
+        }
 
 		void handlePacket(UInt32 cmd, UInt32 seq, byte[] dataBuf) {
 			if (cmd == 9) {

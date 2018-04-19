@@ -15,7 +15,9 @@ namespace ntrclient
     {
 		public delegate void LogDelegate(string l);
 		public LogDelegate delAddLog;
-        string version = "0.1 Beta";
+        string version = "0.2 Beta";
+
+
 
 
         public CmdWindow()
@@ -32,6 +34,12 @@ namespace ntrclient
         static int g_text_buf_addr = 0;
         static int g_text_count = 0;
         static int g_send_asm = 0;
+        public uint ReadValue = 0xdeadbeef;
+
+        public void setReadValue(uint r)
+        {
+            ReadValue = r;
+        }
 
         private void ChangeAddresses()
         {
@@ -39,7 +47,7 @@ namespace ntrclient
             switch(tidLow)
             {
                 case "000086300":
-                    g_text_buf_addr = 0x32DC4A10;
+                    g_text_buf_addr = 0x95F110;
                     g_text_count = 0x32dc5ce8;
                     g_send_asm = 0x193883;
                     break;
@@ -62,14 +70,12 @@ namespace ntrclient
                 pid = GetPID(l);
                 textBox1.Text = pid;
                 ChangeAddresses();
-                
             }
             txtLog.AppendText(l);
         }
 
         private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
         {
-
         }
 
 		private void txtCmd_TextChanged(object sender, EventArgs e) {
@@ -226,23 +232,28 @@ namespace ntrclient
 
         private void button_dummy_read_Click_1(object sender, EventArgs e)
         {
-            runCmd(GenerateWriteString(g_text_count, textBox_dummy_addr.TextLength, 1));
-            byte[] bytes = Encoding.ASCII.GetBytes(textBox_dummy_addr.Text);
-            int index = 0;
-            foreach (byte b in bytes)
+            //byte buf = (byte)readValue(g_text_buf_addr, 1);
+            int pointer = (int)readValue(g_text_buf_addr, 4);
+            if (pointer != 0)
             {
-                runCmd(GenerateWriteString(g_text_buf_addr + (index * 2), b, 1));
-                index++;
+                runCmd(GenerateWriteString(g_text_count, textBox_dummy_addr.TextLength, 1));
+                byte[] bytes = Encoding.ASCII.GetBytes(textBox_dummy_addr.Text);
+                int index = 0;
+                foreach (byte b in bytes)
+                {
+                    runCmd(GenerateWriteString(pointer + (index * 2), b, 1));
+                    index++;
+                }
+                Thread.Sleep(index * 20);
+                runCmd(GenerateWriteString(g_send_asm, 0x1A, 1));
+                Thread.Sleep(200);
+                runCmd(GenerateWriteString(g_send_asm, 0x0A, 1));
+                Thread.Sleep(index * 10);
+                for (int i = 0; i < textBox_dummy_addr.TextLength; i++)
+                    runCmd(GenerateWriteString(pointer + (i * 2), 0, 1)); // clear text buffer
+                textBox_dummy_addr.Text = "";
+                Thread.Sleep(500);
             }
-            Thread.Sleep(index * 20);
-            runCmd(GenerateWriteString(g_send_asm, 0x1A, 1));
-            Thread.Sleep(200);
-            runCmd(GenerateWriteString(g_send_asm, 0x0A, 1));
-            Thread.Sleep(index * 10);
-            for (int i = 0; i < textBox_dummy_addr.TextLength; i++)
-                runCmd(GenerateWriteString(g_text_buf_addr + (i * 2), 0, 1)); // clear text buffer
-            textBox_dummy_addr.Text = "";
-            Thread.Sleep(500);
         }
 
         public string GenerateHexChunk(int value, uint length)
@@ -270,6 +281,23 @@ namespace ntrclient
             string data = GenerateHexChunk(value, length);
 
             return string.Format("write(0x{0:X}, {1}, pid=0x", addr, data) + pid + ")";
+        }
+
+        public uint readValue(int addr, int size)
+        {
+            if (size < 1)
+                size = 1;
+
+            runCmd(string.Format("data(0x{0:X}, 0x{1:X}, pid=0x", addr, size) + pid + ")");
+            int retry = 0;
+            while (ReadValue == 0xdeadbeef && retry < 300000)
+            {
+                Task.Delay(25);
+                retry++;
+            }
+            uint v = ReadValue;
+            ReadValue = 0xdeadbeef;
+            return v;
         }
 
         private void verToolStripMenuItem_Click(object sender, EventArgs e)
