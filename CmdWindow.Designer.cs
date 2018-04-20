@@ -34,6 +34,7 @@
             this.creditsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cell9ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.chatSenderByRydoginatorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.githubToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.versionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.verToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -55,7 +56,6 @@
             this.txtCmd = new System.Windows.Forms.TextBox();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.githubToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -104,6 +104,13 @@
             this.chatSenderByRydoginatorToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
             this.chatSenderByRydoginatorToolStripMenuItem.Text = "Chat sender by rydoginator";
             this.chatSenderByRydoginatorToolStripMenuItem.Click += new System.EventHandler(this.chatSenderByRydoginatorToolStripMenuItem_Click);
+            // 
+            // githubToolStripMenuItem
+            // 
+            this.githubToolStripMenuItem.Name = "githubToolStripMenuItem";
+            this.githubToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
+            this.githubToolStripMenuItem.Text = "Github";
+            this.githubToolStripMenuItem.Click += new System.EventHandler(this.githubToolStripMenuItem_Click);
             // 
             // versionToolStripMenuItem
             // 
@@ -179,6 +186,7 @@
             this.textBox_dummy_addr.Size = new System.Drawing.Size(425, 20);
             this.textBox_dummy_addr.TabIndex = 25;
             this.textBox_dummy_addr.Text = "Text";
+            this.textBox_dummy_addr.TextChanged += new System.EventHandler(this.textBox_dummy_addr_TextChanged);
             this.textBox_dummy_addr.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox_dummy_addr_TextChanged);
             // 
             // button_hello
@@ -309,13 +317,6 @@
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
             this.toolStripStatusLabel1.Size = new System.Drawing.Size(118, 17);
             this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
-            // 
-            // githubToolStripMenuItem
-            // 
-            this.githubToolStripMenuItem.Name = "githubToolStripMenuItem";
-            this.githubToolStripMenuItem.Size = new System.Drawing.Size(218, 22);
-            this.githubToolStripMenuItem.Text = "Github";
-            this.githubToolStripMenuItem.Click += new System.EventHandler(this.githubToolStripMenuItem_Click);
             // 
             // CmdWindow
             // 

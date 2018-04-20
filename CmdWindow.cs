@@ -15,7 +15,7 @@ namespace ntrclient
     {
 		public delegate void LogDelegate(string l);
 		public LogDelegate delAddLog;
-        string version = "0.3 Beta";
+        string version = "0.4 Beta";
 
 
 
@@ -34,6 +34,7 @@ namespace ntrclient
         static int g_text_buf_addr = 0;
         static int g_text_count = 0;
         static int g_send_asm = 0;
+        static int g_button = 0;
         public uint ReadValue = 0xdeadbeef;
 
         public void setReadValue(uint r)
@@ -46,15 +47,23 @@ namespace ntrclient
             String tidLow = tid.Substring(7, 9);
             switch(tidLow)
             {
+                case "000086200":
+                    g_text_buf_addr = 0x958108;
+                    g_send_asm = 0x1937E8;
+                    g_text_count = 0x32E15620;
+                    g_button = 0xAD0278;
+                    break;
                 case "000086300":
                     g_text_buf_addr = 0x95F110;
                     g_text_count = 0x32dc5ce8;
-                    g_send_asm = 0x193883;
+                    g_send_asm = 0x193878;
+                    g_button = 0xAD7278;
                     break;
                 case "000086400":
                     g_text_buf_addr = 0x0095E108;
-                    g_send_asm = 0x1938A3;
+                    g_send_asm = 0x193898;
                     g_text_count = 0x32D9D968;
+                    g_button = 0xAD6278;
                     break;
                 default:
                 
@@ -75,6 +84,7 @@ namespace ntrclient
                 tid = GetTID(l);
                 pid = GetPID(l);
                 textBox1.Text = pid;
+                textBox_dummy_addr.Text = "";
                 ChangeAddresses();
             }
             txtLog.AppendText(l);
@@ -238,27 +248,29 @@ namespace ntrclient
 
         private void button_dummy_read_Click_1(object sender, EventArgs e)
         {
-            //byte buf = (byte)readValue(g_text_buf_addr, 1);
-            int pointer = (int)readValue(g_text_buf_addr, 4);
-            if (pointer != 0)
+            byte[] patch = {0x01, 0x10, 0xA0, 0xE3 }; // MOV R1, #01
+            byte[] original = { 0x00, 0x10, 0xD1, 0xE5 }; // LDRB R1, [R1]
+
+            int len = (int)readValue(g_text_count, 1) >> 24;
+            if (len == textBox_dummy_addr.TextLength)
             {
-                runCmd(GenerateWriteString(g_text_count, textBox_dummy_addr.TextLength, 1));
-                byte[] bytes = Encoding.Unicode.GetBytes(textBox_dummy_addr.Text);
-                int index = 0;
-                foreach (byte b in bytes)
+                // patch the game to spoof the send button
+                for (int i = 0; i < 4; i++)
                 {
-                    runCmd(GenerateWriteString(pointer + index, b, 1));
-                    index++;
+                    runCmd(GenerateWriteString(g_send_asm + i, patch[i], 1));
                 }
-                Thread.Sleep(index * 20);
-                runCmd(GenerateWriteString(g_send_asm, 0x1A, 1));
+                runCmd(GenerateWriteString(g_button, 2, 4));
                 Thread.Sleep(200);
-                runCmd(GenerateWriteString(g_send_asm, 0x0A, 1));
-                Thread.Sleep(index * 10);
-                for (int i = 0; i < textBox_dummy_addr.TextLength * 2; i++)
-                    runCmd(GenerateWriteString(pointer + i, 0, 1)); // clear text buffer
+                // un patch the game to prevent spam
+                for (int i = 0; i < 4; i++)
+                {
+                    runCmd(GenerateWriteString(g_send_asm + i, original[i], 1));
+                }
+                Thread.Sleep(len * 20);
+                int pointer = (int)readValue(g_text_buf_addr, 4);
+                for (int i = 0; i < len * 2; i++)
+                    runCmd(GenerateWriteString(pointer + i, 0, 1));
                 textBox_dummy_addr.Text = "";
-                Thread.Sleep(500);
             }
         }
 
@@ -326,6 +338,34 @@ namespace ntrclient
         private void githubToolStripMenuItem_Click(object sender, EventArgs e)
         {
             System.Diagnostics.Process.Start("https://github.com/RyDog199/acnl-chat-sender/");
+        }
+
+        private void textBox_dummy_addr_TextChanged(object sender, EventArgs e)
+        {
+            int pointer = (int)readValue(g_text_buf_addr, 4);
+            int keyboard = (int)readValue(pointer, 4);
+            int count = (int)readValue(g_text_count, 1) >> 24;
+            if (pointer != 0 && (keyboard == 0 || count != 0) && textBox_dummy_addr.Text != "") // check if buffer is empty and you're on the keyboard
+            {
+                if (count > textBox_dummy_addr.TextLength) // if you pressed backspace, write null chars
+                {
+                    runCmd(GenerateWriteString(pointer + (count * 2) - 2, 0, 1));
+                    runCmd(GenerateWriteString(pointer + (count * 2) - 1, 0, 1));
+                    runCmd(GenerateWriteString(g_text_count, textBox_dummy_addr.TextLength, 1));
+                }
+                else
+                {
+                    runCmd(GenerateWriteString(g_text_count, textBox_dummy_addr.TextLength, 1));
+                    count++;
+                    byte[] bytes = Encoding.Unicode.GetBytes(textBox_dummy_addr.Text);
+                    runCmd(GenerateWriteString(pointer + (count * 2) - 2, bytes[(count * 2) - 2], 1));
+                    runCmd(GenerateWriteString(pointer + (count * 2) - 1, bytes[(count * 2) - 1], 1));
+                }
+            }
+            else
+            {
+                textBox_dummy_addr.Text = "";
+            }
         }
     }
 }
