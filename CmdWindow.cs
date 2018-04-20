@@ -15,7 +15,7 @@ namespace ntrclient
     {
 		public delegate void LogDelegate(string l);
 		public LogDelegate delAddLog;
-        string version = "0.2 Beta";
+        string version = "0.3 Beta";
 
 
 
@@ -51,7 +51,13 @@ namespace ntrclient
                     g_text_count = 0x32dc5ce8;
                     g_send_asm = 0x193883;
                     break;
+                case "000086400":
+                    g_text_buf_addr = 0x0095E108;
+                    g_send_asm = 0x1938A3;
+                    g_text_count = 0x32D9D968;
+                    break;
                 default:
+                
                     break;
 
             }
@@ -237,11 +243,11 @@ namespace ntrclient
             if (pointer != 0)
             {
                 runCmd(GenerateWriteString(g_text_count, textBox_dummy_addr.TextLength, 1));
-                byte[] bytes = Encoding.ASCII.GetBytes(textBox_dummy_addr.Text);
+                byte[] bytes = Encoding.Unicode.GetBytes(textBox_dummy_addr.Text);
                 int index = 0;
                 foreach (byte b in bytes)
                 {
-                    runCmd(GenerateWriteString(pointer + (index * 2), b, 1));
+                    runCmd(GenerateWriteString(pointer + index, b, 1));
                     index++;
                 }
                 Thread.Sleep(index * 20);
@@ -249,8 +255,8 @@ namespace ntrclient
                 Thread.Sleep(200);
                 runCmd(GenerateWriteString(g_send_asm, 0x0A, 1));
                 Thread.Sleep(index * 10);
-                for (int i = 0; i < textBox_dummy_addr.TextLength; i++)
-                    runCmd(GenerateWriteString(pointer + (i * 2), 0, 1)); // clear text buffer
+                for (int i = 0; i < textBox_dummy_addr.TextLength * 2; i++)
+                    runCmd(GenerateWriteString(pointer + i, 0, 1)); // clear text buffer
                 textBox_dummy_addr.Text = "";
                 Thread.Sleep(500);
             }
