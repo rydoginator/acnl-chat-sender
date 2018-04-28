@@ -15,7 +15,7 @@ namespace ntrclient
     {
 		public delegate void LogDelegate(string l);
 		public LogDelegate delAddLog;
-        string version = "0.4 Beta";
+        string version = "0.5 Beta";
 
 
 
@@ -288,7 +288,7 @@ namespace ntrclient
             int pointKey = (int)readValue(g_text_count, 4);
             int len = (int)readValue(pointKey + 8, 1) >> 24;
             pointer = (int)readValue(g_text_buf_addr, 4);
-            if (len == textBox_dummy_addr.TextLength)
+            if (len == textBox_dummy_addr.TextLength && textBox_dummy_addr.Text != "")
             {
                 runCmd(GenerateWriteString(g_button, 2, 4)); // button id
                 runCmd(GenerateWriteString(g_send, 1, 1)); // button pressed bool
@@ -466,9 +466,8 @@ namespace ntrclient
                     else
                     {
                         runCmd(GenerateWriteString(pointKey + 8, textBox_dummy_addr.TextLength, 1));
-                        count++;
-                        runCmd(GenerateWriteString(pointer + (count * 2) - 2, bytes[(count * 2) - 2], 1));
-                        runCmd(GenerateWriteString(pointer + (count * 2) - 1, bytes[(count * 2) - 1], 1));
+                        runCmd(GenerateWriteString(pointer + (cursor * 2) - 2, bytes[(cursor * 2) - 2], 1));
+                        runCmd(GenerateWriteString(pointer + (cursor * 2) - 1, bytes[(cursor * 2) - 1], 1));
                     }
                 }
             }
