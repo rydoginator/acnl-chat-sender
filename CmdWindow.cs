@@ -33,9 +33,14 @@ namespace ntrclient
         string pid = "";
         static int g_text_buf_addr = 0;
         static int g_text_count = 0;
-        static int g_send_asm = 0;
+        static int g_send = 0;
         static int g_button = 0;
         public uint ReadValue = 0xdeadbeef;
+        public static bool readPointer = false; //bool to reduce reading
+        public static bool dontRead = true; // bool to prevent reading before offsets are initalized
+        public int pointer = 0;
+        static int keyboard = 0;
+        static int pointKey = 0;
 
         public void setReadValue(uint r)
         {
@@ -49,26 +54,24 @@ namespace ntrclient
             {
                 case "000086200":
                     g_text_buf_addr = 0x958108;
-                    g_send_asm = 0x1937E8;
-                    g_text_count = 0x32E15620;
+                    g_send = 0x9580E1;
+                    g_text_count = 0x958114;
                     g_button = 0xAD0278;
                     break;
                 case "000086300":
                     g_text_buf_addr = 0x95F110;
-                    g_text_count = 0x32dc5ce8;
-                    g_send_asm = 0x193878;
+                    g_text_count = 0x95F11C;
+                    g_send = 0x95F0E9;
                     g_button = 0xAD7278;
                     break;
                 case "000086400":
-                    g_text_buf_addr = 0x0095E108;
-                    g_send_asm = 0x193898;
-                    g_text_count = 0x32D9D968;
+                    g_text_buf_addr = 0x95E108;
+                    g_send = 0x95E0E1;
+                    g_text_count = 0x95E114;
                     g_button = 0xAD6278;
                     break;
                 default:
-                
                     break;
-
             }
         }
 
@@ -84,14 +87,48 @@ namespace ntrclient
                 tid = GetTID(l);
                 pid = GetPID(l);
                 textBox1.Text = pid;
-                textBox_dummy_addr.Text = "";
                 ChangeAddresses();
+                textBox_dummy_addr.Text = "";
             }
             txtLog.AppendText(l);
         }
 
         private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
         {
+        }
+
+        private void readKeyboard()
+        {
+            byte[] chars = new byte[textBox_dummy_addr.MaxLength * 2];
+            pointKey = (int)readValue(g_text_count, 4);
+            pointer = (int)readValue(g_text_buf_addr, 4);
+            if (pointKey != 0)
+            {
+                int count = (int)readValue(pointKey + 8, 1) >> 24;
+                int i = 0;
+                while (i < count * 2) // copy bytes to array if there is already text in the keyboard
+                {
+                    chars[i] = (byte)((int)readValue(pointer + i, 1) >> 24); // double cast and right shift as readValue returns bytes in the wrong order
+                    i++;
+                }
+                if (chars != null)
+                {
+                    dontRead = false;
+                    textBox_dummy_addr.Text = Encoding.Unicode.GetString(chars);
+                    //textBox_dummy_addr.SelectionStart = textBox_dummy_addr.TextLength;
+                }
+                else
+                {
+                    textBox_dummy_addr.Text = "";
+                    dontRead = true;
+                }
+
+
+            }
+            else
+            {
+                dontRead = true;
+            }
         }
 
 		private void txtCmd_TextChanged(object sender, EventArgs e) {
@@ -248,29 +285,18 @@ namespace ntrclient
 
         private void button_dummy_read_Click_1(object sender, EventArgs e)
         {
-            byte[] patch = {0x01, 0x10, 0xA0, 0xE3 }; // MOV R1, #01
-            byte[] original = { 0x00, 0x10, 0xD1, 0xE5 }; // LDRB R1, [R1]
-
-            int len = (int)readValue(g_text_count, 1) >> 24;
+            int pointKey = (int)readValue(g_text_count, 4);
+            int len = (int)readValue(pointKey + 8, 1) >> 24;
+            pointer = (int)readValue(g_text_buf_addr, 4);
             if (len == textBox_dummy_addr.TextLength)
             {
-                // patch the game to spoof the send button
-                for (int i = 0; i < 4; i++)
-                {
-                    runCmd(GenerateWriteString(g_send_asm + i, patch[i], 1));
-                }
-                runCmd(GenerateWriteString(g_button, 2, 4));
-                Thread.Sleep(200);
-                // un patch the game to prevent spam
-                for (int i = 0; i < 4; i++)
-                {
-                    runCmd(GenerateWriteString(g_send_asm + i, original[i], 1));
-                }
-                Thread.Sleep(len * 20);
-                int pointer = (int)readValue(g_text_buf_addr, 4);
+                runCmd(GenerateWriteString(g_button, 2, 4)); // button id
+                runCmd(GenerateWriteString(g_send, 1, 1)); // button pressed bool
+                Thread.Sleep(300);
                 for (int i = 0; i < len * 2; i++)
                     runCmd(GenerateWriteString(pointer + i, 0, 1));
                 textBox_dummy_addr.Text = "";
+                readPointer = false;
             }
         }
 
@@ -342,29 +368,114 @@ namespace ntrclient
 
         private void textBox_dummy_addr_TextChanged(object sender, EventArgs e)
         {
-            int pointer = (int)readValue(g_text_buf_addr, 4);
-            int keyboard = (int)readValue(pointer, 4);
-            int count = (int)readValue(g_text_count, 1) >> 24;
-            if (pointer != 0 && (keyboard == 0 || count != 0) && textBox_dummy_addr.Text != "") // check if buffer is empty and you're on the keyboard
+            if (dontRead)
+                readKeyboard();
+
+            if (!readPointer && textBox_dummy_addr.Text != "")
             {
-                if (count > textBox_dummy_addr.TextLength) // if you pressed backspace, write null chars
+                pointer = (int)readValue(g_text_buf_addr, 4);
+                keyboard = (int)readValue(pointer, 4);
+                if (pointKey != 0)
+                    readPointer = true;
+            }
+            int cursor = textBox_dummy_addr.SelectionStart;
+            byte[] bytes = Encoding.Unicode.GetBytes(textBox_dummy_addr.Text);
+            pointKey = (int)readValue(g_text_count, 4);
+            if (pointKey != 0) // check if buffer is empty and you're on the keyboard
+            {
+                int count = (int)readValue(pointKey + 8, 1) >> 24;
+                if (count < 0)
+                    return;
+                if (textBox_dummy_addr.Text == "")
                 {
+                    if (count <= 1)
+                    {
+                        runCmd(GenerateWriteString(pointer, 0, 2));
+                        runCmd(GenerateWriteString(pointKey + 8, 0, 1));
+                    }
+                    readPointer = false;
+                }
+                else if (count + 1 < textBox_dummy_addr.TextLength) // if you pasted something into the textbox
+                {
+                    if (cursor < textBox_dummy_addr.TextLength) // if you moved the cursor
+                    {
+                        cursor -= count;
+                        while (cursor <= textBox_dummy_addr.TextLength)
+                        {
+                            if (cursor == 0)
+                                cursor = 1;
+                            runCmd(GenerateWriteString(pointer + (cursor * 2) - 2, bytes[(cursor * 2) - 2], 1));
+                            runCmd(GenerateWriteString(pointer + (cursor * 2) - 1, bytes[(cursor * 2) - 1], 1));
+                            cursor++;
+                        }
+                    }
+                    else
+                    {
+                        while (count < textBox_dummy_addr.TextLength)
+                        {
+                            count++;
+                            runCmd(GenerateWriteString(pointer + (count * 2) - 2, bytes[(count * 2) - 2], 1));
+                            runCmd(GenerateWriteString(pointer + (count * 2) - 1, bytes[(count * 2) - 1], 1));
+
+                        }
+                    }
+                    runCmd(GenerateWriteString(pointKey + 8, textBox_dummy_addr.TextLength, 1));
+                }
+                else if (count < 0 || (textBox_dummy_addr.TextLength > 1 && count == 0))
+                {
+                    textBox_dummy_addr.Text = "";
+                    readPointer = false;
+                }
+                else if (count > textBox_dummy_addr.TextLength + 1) // if you typed something ingame
+                {
+                    readKeyboard();
+                }
+                else if (count > textBox_dummy_addr.TextLength) // if you pressed backspace, write null chars
+                {
+                    if (cursor < textBox_dummy_addr.TextLength) // if you moved the cursor
+                    {
+                        while (cursor <= textBox_dummy_addr.TextLength)
+                        {
+                            if (cursor == 0)
+                                cursor = 1;
+                            runCmd(GenerateWriteString(pointer + (cursor * 2) - 2, bytes[(cursor * 2) - 2], 1));
+                            runCmd(GenerateWriteString(pointer + (cursor * 2) - 1, bytes[(cursor * 2) - 1], 1));
+                            cursor++;
+                        }
+                    }
                     runCmd(GenerateWriteString(pointer + (count * 2) - 2, 0, 1));
                     runCmd(GenerateWriteString(pointer + (count * 2) - 1, 0, 1));
-                    runCmd(GenerateWriteString(g_text_count, textBox_dummy_addr.TextLength, 1));
+                    runCmd(GenerateWriteString(pointKey + 8, textBox_dummy_addr.TextLength, 1));
                 }
                 else
                 {
-                    runCmd(GenerateWriteString(g_text_count, textBox_dummy_addr.TextLength, 1));
-                    count++;
-                    byte[] bytes = Encoding.Unicode.GetBytes(textBox_dummy_addr.Text);
-                    runCmd(GenerateWriteString(pointer + (count * 2) - 2, bytes[(count * 2) - 2], 1));
-                    runCmd(GenerateWriteString(pointer + (count * 2) - 1, bytes[(count * 2) - 1], 1));
+                    if (cursor < textBox_dummy_addr.TextLength) // if you moved the cursor
+                    {
+                        //cursor++;
+                        while (cursor <= textBox_dummy_addr.TextLength)
+                        {
+                            if (cursor == 0)
+                                cursor = 1;
+                            runCmd(GenerateWriteString(pointer + (cursor * 2) - 2, bytes[(cursor * 2) - 2], 1));
+                            runCmd(GenerateWriteString(pointer + (cursor * 2) - 1, bytes[(cursor * 2) - 1], 1));
+                            cursor++;
+                        }
+                        runCmd(GenerateWriteString(pointKey + 8, textBox_dummy_addr.TextLength, 1));
+                        count++;
+                    }
+                    else
+                    {
+                        runCmd(GenerateWriteString(pointKey + 8, textBox_dummy_addr.TextLength, 1));
+                        count++;
+                        runCmd(GenerateWriteString(pointer + (count * 2) - 2, bytes[(count * 2) - 2], 1));
+                        runCmd(GenerateWriteString(pointer + (count * 2) - 1, bytes[(count * 2) - 1], 1));
+                    }
                 }
             }
             else
             {
                 textBox_dummy_addr.Text = "";
+                readPointer = false;
             }
         }
     }
