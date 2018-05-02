@@ -15,9 +15,9 @@ namespace ntrclient
     {
 		public delegate void LogDelegate(string l);
 		public LogDelegate delAddLog;
-        string version = "0.5 Beta";
+        string version = "0.6 Beta";
 
-
+        public static ScriptHelper sh = new ScriptHelper();
 
 
         public CmdWindow()
@@ -30,17 +30,17 @@ namespace ntrclient
         }
 
         string tid = "";
-        string pid = "";
-        static int g_text_buf_addr = 0;
-        static int g_text_count = 0;
-        static int g_send = 0;
-        static int g_button = 0;
+        int pid = 0;
+        static uint g_text_buf_addr = 0;
+        static uint g_text_count = 0;
+        static uint g_send = 0;
+        static uint g_button = 0;
         public uint ReadValue = 0xdeadbeef;
         public static bool readPointer = false; //bool to reduce reading
         public static bool dontRead = true; // bool to prevent reading before offsets are initalized
-        public int pointer = 0;
-        static int keyboard = 0;
-        static int pointKey = 0;
+        public uint pointer = 0;
+        static uint keyboard = 0;
+        static uint pointKey = 0;
 
         public void setReadValue(uint r)
         {
@@ -86,7 +86,7 @@ namespace ntrclient
             {
                 tid = GetTID(l);
                 pid = GetPID(l);
-                textBox1.Text = pid;
+                textBox1.Text = pid.ToString();
                 ChangeAddresses();
                 textBox_dummy_addr.Text = "";
             }
@@ -100,15 +100,15 @@ namespace ntrclient
         private void readKeyboard()
         {
             byte[] chars = new byte[textBox_dummy_addr.MaxLength * 2];
-            pointKey = (int)readValue(g_text_count, 4);
-            pointer = (int)readValue(g_text_buf_addr, 4);
+            pointKey = readValue(g_text_count, 4);
+            pointer = readValue(g_text_buf_addr, 4);
             if (pointKey != 0)
             {
                 int count = (int)readValue(pointKey + 8, 1) >> 24;
                 int i = 0;
                 while (i < count * 2) // copy bytes to array if there is already text in the keyboard
                 {
-                    chars[i] = (byte)((int)readValue(pointer + i, 1) >> 24); // double cast and right shift as readValue returns bytes in the wrong order
+                    chars[i] = (byte)((int)readValue((uint)(pointer + i), 1) >> 24); // double cast and right shift as readValue returns bytes in the wrong order
                     i++;
                 }
                 if (chars != null)
@@ -134,7 +134,7 @@ namespace ntrclient
 		private void txtCmd_TextChanged(object sender, EventArgs e) {
 
 		}
-		void runCmd(String cmd) {
+		/*void runCmd(String cmd) {
 			try {
 				Addlog("> " + cmd);
 				object ret = Program.pyEngine.CreateScriptSourceFromString(cmd).Execute(Program.globalScope);
@@ -148,12 +148,12 @@ namespace ntrclient
 				Addlog(ex.Message);
 				Addlog(ex.StackTrace);
 			}
-		}
+		}*/
 		private void txtCmd_KeyDown(object sender, KeyEventArgs e) {
 			if (e.KeyCode == Keys.Enter) {
-				string cmd =  txtCmd.Text  ;
+				string cmd =  txtCmd.Text;
 				txtCmd.Clear();
-				runCmd(cmd);
+				//runCmd(cmd);
 
 			}
 		}
@@ -176,10 +176,6 @@ namespace ntrclient
 
 		private void CmdWindow_Load(object sender, EventArgs e) {
             Addlog("NTR debugger by cell9");
-			runCmd("import sys;sys.path.append('.\\python\\Lib')");
-			runCmd("for n in [n for n in dir(nc) if not n.startswith('_')]: globals()[n] = getattr(nc,n)    ");
-			Addlog("Commands available: ");
-			runCmd("repr([n for n in dir(nc) if not n.startswith('_')])");
 		}
 
 		private void CmdWindow_FormClosed(object sender, FormClosedEventArgs e) {
@@ -204,7 +200,7 @@ namespace ntrclient
 			if (e.Control) {
 				int t = e.KeyValue;
 				if (t >= 48 && t <= 57) {
-					runCmd(Program.sm.quickCmds[t-48]);
+					//runCmd(Program.sm.quickCmds[t-48]); stubbed. will be replaced with emotes
 					e.SuppressKeyPress = true;
 
 				}
@@ -229,7 +225,7 @@ namespace ntrclient
         private void disconnectTimer_Tick(object sender, EventArgs e)
         {
             disconnectTimer.Enabled = false;
-            runCmd("disconnect()");
+            sh.disconnect();
         }
 
 
@@ -247,9 +243,9 @@ namespace ntrclient
 
         private void button_Connect_Click_1(object sender, EventArgs e)
         {
-            runCmd("connect('" + textBox_Ip.Text + "', 8000)");
+            sh.connect(textBox_Ip.Text, 8000);
             Program.sm.IpAddress = textBox_Ip.Text;
-            runCmd("listprocess()");
+            sh.listprocess();
         }
         
         private String GetTID(String message)
@@ -262,77 +258,49 @@ namespace ntrclient
             return (message.Substring(message.IndexOf("tid:") + 5, 16));
         }
 
-        private String GetPID(String message)
+        private int GetPID(String message)
         {
             int index = message.IndexOf("GARDEN");
             if (index != -1)
                 message = message.Substring(index - 13, 2);
             else
-                return "";
-            return (message);
+                return -1;
+            return (Convert.ToInt32(message, 16));
         }
 
         private void button_disconnect_Click_1(object sender, EventArgs e)
         {
             disconnectTimer.Enabled = false;
-            runCmd("disconnect()");
+            sh.disconnect();
         }
 
         private void button_hello_Click_1(object sender, EventArgs e)
         {
-            runCmd("sayhello()");
+            sh.sayhello();
         }
 
         private void button_dummy_read_Click_1(object sender, EventArgs e)
         {
-            int pointKey = (int)readValue(g_text_count, 4);
+            uint pointKey = readValue(g_text_count, 4);
             int len = (int)readValue(pointKey + 8, 1) >> 24;
-            pointer = (int)readValue(g_text_buf_addr, 4);
+            pointer = readValue(g_text_buf_addr, 4);
             if (len == textBox_dummy_addr.TextLength && textBox_dummy_addr.Text != "")
             {
-                runCmd(GenerateWriteString(g_button, 2, 4)); // button id
-                runCmd(GenerateWriteString(g_send, 1, 1)); // button pressed bool
+                sh.write(g_button, 2, 4, pid); // button id
+                sh.write((uint)g_send, 1, 1, pid);  //button pressed bool
                 Thread.Sleep(300);
                 for (int i = 0; i < len * 2; i++)
-                    runCmd(GenerateWriteString(pointer + i, 0, 1));
+                    sh.write((uint)(pointer + i), 0, 1, pid);
                 textBox_dummy_addr.Text = "";
                 readPointer = false;
             }
         }
 
-        public string GenerateHexChunk(int value, uint length)
-        {
-            string data = "(";
-            byte[] bytes = BitConverter.GetBytes(value);
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                byte b = bytes[i];
-                if (i < length - 1)
-                {
-                    data += string.Format("0x{0:X}, ", b);
-                }
-                else
-                {
-                    data += string.Format("0x{0:X},", b);
-                    break;
-                }
-            }
-            return data + ")";
-        }
-
-        public string GenerateWriteString(int addr, int value, uint length)
-        {
-            string data = GenerateHexChunk(value, length);
-
-            return string.Format("write(0x{0:X}, {1}, pid=0x", addr, data) + pid + ")";
-        }
-
-        public uint readValue(int addr, int size)
+        public uint readValue(uint addr, uint size)
         {
             if (size < 1)
                 size = 1;
-
-            runCmd(string.Format("data(0x{0:X}, 0x{1:X}, pid=0x", addr, size) + pid + ")");
+            sh.data((uint)addr, size, pid);
             int retry = 0;
             while (ReadValue == 0xdeadbeef && retry < 300000)
             {
@@ -373,14 +341,14 @@ namespace ntrclient
 
             if (!readPointer && textBox_dummy_addr.Text != "")
             {
-                pointer = (int)readValue(g_text_buf_addr, 4);
-                keyboard = (int)readValue(pointer, 4);
+                pointer = readValue(g_text_buf_addr, 4);
+                keyboard = readValue(pointer, 4);
                 if (pointKey != 0)
                     readPointer = true;
             }
             int cursor = textBox_dummy_addr.SelectionStart;
-            byte[] bytes = Encoding.Unicode.GetBytes(textBox_dummy_addr.Text);
-            pointKey = (int)readValue(g_text_count, 4);
+           // byte[] bytes = Encoding.Unicode.GetBytes(textBox_dummy_addr.Text);
+            pointKey = readValue(g_text_count, 4);
             if (pointKey != 0) // check if buffer is empty and you're on the keyboard
             {
                 int count = (int)readValue(pointKey + 8, 1) >> 24;
@@ -390,8 +358,8 @@ namespace ntrclient
                 {
                     if (count <= 1)
                     {
-                        runCmd(GenerateWriteString(pointer, 0, 2));
-                        runCmd(GenerateWriteString(pointKey + 8, 0, 1));
+                        sh.write(pointer, 0, 2, pid);
+                        sh.write(pointKey + 8, 0, 1, pid);
                     }
                     readPointer = false;
                 }
@@ -399,27 +367,13 @@ namespace ntrclient
                 {
                     if (cursor < textBox_dummy_addr.TextLength) // if you moved the cursor
                     {
-                        cursor -= count;
-                        while (cursor <= textBox_dummy_addr.TextLength)
-                        {
-                            if (cursor == 0)
-                                cursor = 1;
-                            runCmd(GenerateWriteString(pointer + (cursor * 2) - 2, bytes[(cursor * 2) - 2], 1));
-                            runCmd(GenerateWriteString(pointer + (cursor * 2) - 1, bytes[(cursor * 2) - 1], 1));
-                            cursor++;
-                        }
+                        sh.sendText((uint)(pointer + ((textBox_dummy_addr.TextLength - cursor) * 2)), textBox_dummy_addr.Text.Substring(textBox_dummy_addr.TextLength - cursor, cursor), pid);
                     }
                     else
                     {
-                        while (count < textBox_dummy_addr.TextLength)
-                        {
-                            count++;
-                            runCmd(GenerateWriteString(pointer + (count * 2) - 2, bytes[(count * 2) - 2], 1));
-                            runCmd(GenerateWriteString(pointer + (count * 2) - 1, bytes[(count * 2) - 1], 1));
-
-                        }
+                        sh.sendText((uint)(pointer + (count * 2)), textBox_dummy_addr.Text.Substring(count, textBox_dummy_addr.TextLength - count), pid);
                     }
-                    runCmd(GenerateWriteString(pointKey + 8, textBox_dummy_addr.TextLength, 1));
+                    sh.write(pointKey + 8, textBox_dummy_addr.TextLength, 1, pid);
                 }
                 else if (count < 0 || (textBox_dummy_addr.TextLength > 1 && count == 0))
                 {
@@ -434,40 +388,23 @@ namespace ntrclient
                 {
                     if (cursor < textBox_dummy_addr.TextLength) // if you moved the cursor
                     {
-                        while (cursor <= textBox_dummy_addr.TextLength)
-                        {
-                            if (cursor == 0)
-                                cursor = 1;
-                            runCmd(GenerateWriteString(pointer + (cursor * 2) - 2, bytes[(cursor * 2) - 2], 1));
-                            runCmd(GenerateWriteString(pointer + (cursor * 2) - 1, bytes[(cursor * 2) - 1], 1));
-                            cursor++;
-                        }
+                        sh.sendText((uint)(pointer + ((textBox_dummy_addr.TextLength - cursor) * 2)), textBox_dummy_addr.Text.Substring(textBox_dummy_addr.TextLength - cursor, cursor), pid);
                     }
-                    runCmd(GenerateWriteString(pointer + (count * 2) - 2, 0, 1));
-                    runCmd(GenerateWriteString(pointer + (count * 2) - 1, 0, 1));
-                    runCmd(GenerateWriteString(pointKey + 8, textBox_dummy_addr.TextLength, 1));
+                    sh.write((uint)(pointer + (count * 2) - 2), 0, 2, pid);
+                    sh.write(pointKey + 8, textBox_dummy_addr.TextLength, 1, pid);
                 }
                 else
                 {
                     if (cursor < textBox_dummy_addr.TextLength) // if you moved the cursor
                     {
-                        //cursor++;
-                        while (cursor <= textBox_dummy_addr.TextLength)
-                        {
-                            if (cursor == 0)
-                                cursor = 1;
-                            runCmd(GenerateWriteString(pointer + (cursor * 2) - 2, bytes[(cursor * 2) - 2], 1));
-                            runCmd(GenerateWriteString(pointer + (cursor * 2) - 1, bytes[(cursor * 2) - 1], 1));
-                            cursor++;
-                        }
-                        runCmd(GenerateWriteString(pointKey + 8, textBox_dummy_addr.TextLength, 1));
+                        sh.sendText((uint)(pointer + ((textBox_dummy_addr.TextLength - cursor) * 2)), textBox_dummy_addr.Text.Substring(textBox_dummy_addr.TextLength - cursor, cursor), pid);
+                        sh.write(pointKey + 8, textBox_dummy_addr.TextLength, 1, pid);
                         count++;
                     }
                     else
                     {
-                        runCmd(GenerateWriteString(pointKey + 8, textBox_dummy_addr.TextLength, 1));
-                        runCmd(GenerateWriteString(pointer + (cursor * 2) - 2, bytes[(cursor * 2) - 2], 1));
-                        runCmd(GenerateWriteString(pointer + (cursor * 2) - 1, bytes[(cursor * 2) - 1], 1));
+                        sh.write(pointKey + 8, textBox_dummy_addr.TextLength, 1, pid);
+                        sh.sendText((uint)(pointer + (cursor * 2) - 2), textBox_dummy_addr.Text.Substring(textBox_dummy_addr.TextLength - 1, 1), pid);
                     }
                 }
             }

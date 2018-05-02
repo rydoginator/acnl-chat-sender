@@ -1,22 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using IronPython.Hosting;
-using Microsoft.Scripting.Hosting;
-using System.Collections.Specialized;
 
 
 namespace ntrclient
 {
     static class Program
     {
-
-        public static ScriptEngine pyEngine;
         public static NtrClient ntrClient;
-		public static ScriptHelper scriptHelper;
-		public static ScriptScope globalScope;
 		public static CmdWindow gCmdWindow;
 		public static SettingsManager sm;
 
@@ -35,13 +25,8 @@ namespace ntrclient
         [STAThread]
         static void Main()
         {
-            pyEngine = Python.CreateEngine();
             ntrClient = new NtrClient();
-			scriptHelper = new ScriptHelper();
-
-			globalScope = pyEngine.CreateScope();
-			globalScope.SetVariable("nc", scriptHelper);
-			
+		
 			loadConfig();
 
             Application.EnableVisualStyles();

@@ -6,7 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ntrclient {
+   
 	public class ScriptHelper {
+        /* 
+         * 
+         * Stubbed Features
         public void bpadd(uint addr, string type = "code.once") {
             uint num = 0;
             if (type == "code") {
@@ -38,6 +42,7 @@ namespace ntrclient {
         public void resume() {
             Program.ntrClient.sendEmptyPacket(11, 0, 0, 4);
         }
+        */
 
 
 
@@ -85,9 +90,23 @@ namespace ntrclient {
 			Program.ntrClient.sendReadMemPacket(addr, size, (uint) pid, filename);
 		}
 
-		public void write(uint addr, byte[] buf, int pid=-1) {
-			Program.ntrClient.sendWriteMemPacket(addr, (uint)pid, buf);
+		public void write(uint addr, int value, int size, int pid=-1)
+        {
+            byte[] tmp = BitConverter.GetBytes(value);
+            List<byte> b = new List<byte>();
+            for (int i = 0; i < size; i++) // go backwards because of endiness
+            {
+                b.Add(tmp[i]);
+            }
+            byte[] buf = b.ToArray();
+            Program.ntrClient.sendWriteMemPacket(addr, (uint)pid, buf);
 		}
+
+        public void sendText(uint addr, String text, int pid = -1)
+        {
+            byte[] bytes = Encoding.Unicode.GetBytes(text);
+            Program.ntrClient.sendWriteMemPacket(addr, (uint)pid, bytes);
+        }
 
 		public void sendfile(String localPath, String remotePath) {
 			FileStream fs = new FileStream(localPath, FileMode.Open);
