@@ -2,8 +2,10 @@
 A chat sender utilizing NTR Debugger to send messages to the ingame chat via your PC!
 
 # Dependencies
- 
-[IronPython](http://ironpython.net/)
+
+If using Wine [Wine Mono](https://wiki.winehq.org/Mono)
+
+If using an edition of Windows before Windows 10: [.Net Framework](https://www.microsoft.com/en-us/download/details.aspx?id=30653) 
 
 # Preview
 
