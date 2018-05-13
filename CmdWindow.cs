@@ -70,6 +70,12 @@ namespace ntrclient
                     g_text_count = 0x95E114;
                     g_button = 0xAD6278;
                     break;
+                case "000086500": // kor rev 0
+                    g_text_buf_addr = 0x957108;
+                    g_send = 0x9570E1;
+                    g_text_count = 0x957114;
+                    g_button = 0xACF278;
+                    break;
                 case "000198d00": // jap rev 1
                     g_text_buf_addr = 0x957108;
                     g_send = 0x9570E1;
