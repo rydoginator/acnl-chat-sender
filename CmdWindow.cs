@@ -15,7 +15,7 @@ namespace ntrclient
     {
 		public delegate void LogDelegate(string l);
 		public LogDelegate delAddLog;
-        string version = "0.6 Beta";
+        string version = "1.0";
 
         public static ScriptHelper sh = new ScriptHelper();
 
@@ -52,19 +52,37 @@ namespace ntrclient
             String tidLow = tid.Substring(7, 9);
             switch(tidLow)
             {
-                case "000086200":
+                case "000086200": // jap rev 0
                     g_text_buf_addr = 0x958108;
                     g_send = 0x9580E1;
                     g_text_count = 0x958114;
                     g_button = 0xAD0278;
                     break;
-                case "000086300":
+                case "000086300": // usa rev 0
                     g_text_buf_addr = 0x95F110;
-                    g_text_count = 0x95F11C;
                     g_send = 0x95F0E9;
+                    g_text_count = 0x95F11C;
                     g_button = 0xAD7278;
                     break;
-                case "000086400":
+                case "000086400": // eur rev 0
+                    g_text_buf_addr = 0x95E108;
+                    g_send = 0x95E0E1;
+                    g_text_count = 0x95E114;
+                    g_button = 0xAD6278;
+                    break;
+                case "000198d00": // jap rev 1
+                    g_text_buf_addr = 0x957108;
+                    g_send = 0x9570E1;
+                    g_text_count = 0x957114;
+                    g_button = 0xACF278;
+                    break;
+                case "000198e00": // usa rev 1
+                    g_text_buf_addr = 0x0095E0F0;
+                    g_send = 0x95E0C9;
+                    g_text_count = 0x95E0FC;
+                    g_button = 0xAD6278;
+                    break;
+                case "000198f00": // eur rev 1
                     g_text_buf_addr = 0x95E108;
                     g_send = 0x95E0E1;
                     g_text_count = 0x95E114;
@@ -260,9 +278,13 @@ namespace ntrclient
 
         private int GetPID(String message)
         {
+            int offset = 13;
+            if (message.Contains("GARDEN_P"))
+                offset = 11;
             int index = message.IndexOf("GARDEN");
+
             if (index != -1)
-                message = message.Substring(index - 13, 2);
+                message = message.Substring(index - offset, 2);
             else
                 return -1;
             return (Convert.ToInt32(message, 16));
